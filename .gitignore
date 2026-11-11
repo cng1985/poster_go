@@ -1,6 +1,5 @@
-/data/*
-!/data/.gitkeep
-/bin/
-*.exe
-coverage.out
+/data/
+/release/
+/web/node_modules/
+*.log
 .DS_Store
