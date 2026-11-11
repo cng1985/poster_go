@@ -29,6 +29,7 @@ watch(category, load)
 <template>
   <div class="page-head">
     <div>
+      <p class="kicker">版式</p>
       <h1>海报模块</h1>
       <p class="lede">这些是系统准备的版式。选中后会复制成你自己的海报，改动不会写回模块。</p>
     </div>

@@ -53,6 +53,7 @@ onMounted(load)
 <template>
   <div class="page-head">
     <div>
+      <p class="kicker">图库</p>
       <h1>素材库</h1>
       <p class="lede">支持 JPEG、PNG、GIF、WEBP，单张不超过 8MB。图片只属于你自己。</p>
     </div>

@@ -296,24 +296,26 @@ watch(() => route.params.id, () => load())
   <div v-if="!doc" class="editor">
     <header class="editor-bar">
       <router-link class="btn ghost" to="/posters">返回</router-link>
-      <span class="status">{{ error || '加载中' }}</span>
+      <span class="status" :data-state="error ? '无法打开' : '加载中'">{{ error || '加载中' }}</span>
     </header>
   </div>
   <div class="editor" v-else>
     <header class="editor-bar">
       <router-link class="btn ghost" to="/posters">返回</router-link>
       <input class="title" v-model="title" @change="status = '未保存'" />
-      <span class="status">{{ status }}</span>
-      <button class="btn ghost" @click="undo">撤销</button>
-      <button class="btn ghost" @click="analyze">分析</button>
-      <button class="btn ghost" @click="download">导出 PNG</button>
-      <button class="btn primary" :disabled="saving" @click="save">保存</button>
+      <span class="status" :data-state="status">{{ status }}</span>
+      <div class="bar-actions">
+        <button class="btn ghost" @click="undo">撤销</button>
+        <button class="btn ghost" @click="analyze">分析</button>
+        <button class="btn ghost" @click="download">导出 PNG</button>
+        <button class="btn primary" :disabled="saving" @click="save">保存</button>
+      </div>
     </header>
     <aside class="tools">
-      <button class="tool" @click="addText">字</button>
-      <button class="tool" @click="addShape('rect')">矩</button>
-      <button class="tool" @click="addShape('ellipse')">圆</button>
-      <button class="tool" :class="{ on: showAssets }" @click="toggleAssets">图</button>
+      <button class="tool" @click="addText"><span class="glyph">文</span><span>文字</span></button>
+      <button class="tool" @click="addShape('rect')"><span class="glyph">▭</span><span>矩形</span></button>
+      <button class="tool" @click="addShape('ellipse')"><span class="glyph">◯</span><span>圆形</span></button>
+      <button class="tool" :class="{ on: showAssets }" @click="toggleAssets"><span class="glyph">图</span><span>素材</span></button>
     </aside>
     <div class="stage-wrap" ref="stageRef">
       <div

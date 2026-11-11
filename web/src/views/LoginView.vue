@@ -29,10 +29,11 @@ async function submit() {
   <div class="gate">
     <section class="gate-stage">
       <div class="mark"><i></i> 海报工坊</div>
-      <div>
-        <PosterPreview :document="samplePoster" :max-width="360" />
+      <div class="showcase">
+        <PosterPreview :document="samplePoster" :max-width="280" />
       </div>
       <div class="gate-copy">
+        <p class="kicker">设计工作室</p>
         <h1>先排一版，<br />再交给模型。</h1>
         <p>从现成模块开始，上传自己的图片，或用一句话生成海报。编辑器里可以改字、改色、导出。</p>
       </div>

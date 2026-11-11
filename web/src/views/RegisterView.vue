@@ -25,9 +25,10 @@ async function submit() {
 
 <template>
   <div class="gate">
-    <section class="gate-stage">
+    <section class="gate-stage gate-plain">
       <div class="mark"><i></i> 海报工坊</div>
       <div class="gate-copy">
+        <p class="kicker">加入工坊</p>
         <h1>开一个自己的版面。</h1>
         <p>用户名以字母开头。密码至少 8 位，并且同时包含字母和数字。</p>
       </div>

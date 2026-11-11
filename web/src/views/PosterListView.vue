@@ -36,6 +36,7 @@ onMounted(load)
 <template>
   <div class="page-head">
     <div>
+      <p class="kicker">作品</p>
       <h1>我的海报</h1>
       <p class="lede">只显示你自己的作品。</p>
     </div>
