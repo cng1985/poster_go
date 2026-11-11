@@ -2,10 +2,14 @@ package asset
 
 import (
 	"context"
+	"encoding/json"
+	"strconv"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
+	"poster.app/studio/internal/modules/studio/shared"
 	"poster.app/studio/internal/platform/database"
 	"poster.app/studio/internal/platform/domain"
 	apperrors "poster.app/studio/internal/platform/errors"
@@ -72,6 +76,37 @@ func (r *Repository) Search(ctx context.Context, search *AssetSearch) (response.
 		data = append(data, *AssetEntityToSimple(&rows[i]))
 	}
 	return response.PageResponse[AssetSimple]{Data: data, Total: total, Page: search.Page, PageSize: search.PageSize}, nil
+}
+
+func (r *Repository) Referenced(ctx context.Context, assetID int64) (bool, error) {
+	owner, err := domain.ActorID(ctx)
+	if err != nil {
+		return false, err
+	}
+	var documents []string
+	err = r.db.WithContext(ctx).Table("poster").Where("owner_id = ?", owner).Pluck("document", &documents).Error
+	if err != nil {
+		return false, database.MapError(err)
+	}
+	for _, raw := range documents {
+		if documentUsesAsset(raw, assetID) {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func documentUsesAsset(raw string, assetID int64) bool {
+	var doc shared.Document
+	if err := json.Unmarshal([]byte(raw), &doc); err == nil {
+		for _, layer := range doc.Layers {
+			if layer.AssetID == assetID {
+				return true
+			}
+		}
+		return false
+	}
+	return strings.Contains(raw, `"asset_id":"`+strconv.FormatInt(assetID, 10)+`"`)
 }
 
 func (r *Repository) Delete(ctx context.Context, request *AssetRequest) (response.Response[AssetResponse], error) {

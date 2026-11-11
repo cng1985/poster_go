@@ -37,9 +37,14 @@ async function onFile(event) {
 }
 
 async function remove(item) {
-  await post('/api/asset/delete', { id: String(item.id) })
-  if (item.url) URL.revokeObjectURL(item.url)
-  await load()
+  error.value = ''
+  try {
+    await post('/api/asset/delete', { id: String(item.id) })
+    if (item.url) URL.revokeObjectURL(item.url)
+    await load()
+  } catch (err) {
+    error.value = err.message
+  }
 }
 
 onMounted(load)

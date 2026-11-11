@@ -97,6 +97,13 @@ func (r *Resource) Delete(ctx context.Context, request *AssetRequest) (response.
 	if err != nil {
 		return zero, err
 	}
+	used, err := r.repo.Referenced(ctx, request.ID)
+	if err != nil {
+		return zero, err
+	}
+	if used {
+		return zero, apperrors.Conflict(10005, "这张图片还在海报里，先从作品中拿掉再删除。")
+	}
 	result, err := r.repo.Delete(ctx, request)
 	if err != nil {
 		return zero, err

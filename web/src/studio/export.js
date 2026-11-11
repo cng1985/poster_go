@@ -24,7 +24,7 @@ export async function exportPNG(doc, images, title) {
       ctx.fill()
     } else if (layer.type === 'image') {
       const image = images[String(layer.asset_id)]
-      if (image) ctx.drawImage(image, 0, 0, layer.w, layer.h)
+      if (image) drawCover(ctx, image, layer.w, layer.h)
     } else if (layer.type === 'text') {
       drawText(ctx, layer)
     }
@@ -37,6 +37,18 @@ export async function exportPNG(doc, images, title) {
   link.download = (title || '海报') + '.png'
   link.click()
   URL.revokeObjectURL(url)
+}
+
+function drawCover(ctx, image, w, h) {
+  const sourceWidth = image.naturalWidth || image.width
+  const sourceHeight = image.naturalHeight || image.height
+  if (!sourceWidth || !sourceHeight || w <= 0 || h <= 0) return
+  const scale = Math.max(w / sourceWidth, h / sourceHeight)
+  const cropWidth = w / scale
+  const cropHeight = h / scale
+  const sx = (sourceWidth - cropWidth) / 2
+  const sy = (sourceHeight - cropHeight) / 2
+  ctx.drawImage(image, sx, sy, cropWidth, cropHeight, 0, 0, w, h)
 }
 
 function roundRect(ctx, x, y, w, h, radius) {

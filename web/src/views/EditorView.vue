@@ -19,6 +19,7 @@ const stageRef = ref(null)
 const scale = ref(0.35)
 const images = reactive({})
 const history = []
+const saving = ref(false)
 let drag = null
 
 const layer = computed(() => doc.value?.layers.find((item) => item.id === selected.value) || null)
@@ -63,14 +64,22 @@ async function hydrate() {
   for (const item of doc.value.layers) {
     if (item.type !== 'image' || !item.asset_id) continue
     const id = String(item.asset_id)
-    if (images[id]) continue
-    const url = await assetURL(id)
-    images[id] = url
-    const element = new Image()
-    element.src = url
-    await element.decode().catch(() => {})
-    images['el:' + id] = element
+    if (images[id] || images['missing:' + id]) continue
+    try {
+      const url = await assetURL(id)
+      images[id] = url
+      const element = new Image()
+      element.src = url
+      await element.decode().catch(() => {})
+      images['el:' + id] = element
+    } catch {
+      images['missing:' + id] = true
+    }
   }
+}
+
+function missingImage(item) {
+  return item?.type === 'image' && images['missing:' + String(item.asset_id)]
 }
 
 function measure() {
@@ -79,26 +88,41 @@ function measure() {
   scale.value = Math.max(0.12, Math.min((rect.width - 48) / doc.value.width, (rect.height - 48) / doc.value.height, 1))
 }
 
+function draftKey(titleText, document) {
+  return JSON.stringify({ title: titleText, document })
+}
+
 async function save() {
-  if (!poster.value) return
+  if (!poster.value || saving.value) return
+  saving.value = true
+  const payload = {
+    id: String(poster.value.id),
+    title: title.value,
+    version: poster.value.version,
+    document: JSON.parse(JSON.stringify(doc.value)),
+  }
+  const sent = draftKey(payload.title, payload.document)
   status.value = '保存中'
   error.value = ''
   try {
-    const result = await post('/api/poster/update', {
-      id: String(poster.value.id),
-      title: title.value,
-      version: poster.value.version,
-      document: doc.value,
-    })
-    poster.value = result.data
-    doc.value = result.data.document
-    status.value = '已保存'
+    const result = await post('/api/poster/update', payload)
+    if (draftKey(title.value, doc.value) === sent) {
+      poster.value = result.data
+      doc.value = result.data.document
+      title.value = result.data.title
+      status.value = '已保存'
+    } else {
+      poster.value.version = result.data.version
+      status.value = '未保存'
+    }
   } catch (err) {
     status.value = '保存失败'
     error.value = err.message
     if (err.code === 10004 && confirm('这张海报刚刚被更新过。重新加载会丢掉这次未保存的修改。')) {
       await load()
     }
+  } finally {
+    saving.value = false
   }
 }
 
@@ -238,16 +262,18 @@ function boxStyle(item, index) {
 
 function paintStyle(item) {
   const size = (item.font_size || 32) * scale.value
+  const imageURL = item.type === 'image' ? images[String(item.asset_id)] : ''
   return {
-    background: item.type === 'rect' || item.type === 'ellipse' ? item.fill : 'transparent',
+    background: item.type === 'rect' || item.type === 'ellipse' ? item.fill : (missingImage(item) ? '#3a332c' : 'transparent'),
     borderRadius: item.type === 'ellipse' ? '50%' : (item.radius || 0) * scale.value + 'px',
-    color: item.color,
-    fontSize: size + 'px',
+    color: missingImage(item) ? '#f4efe6' : item.color,
+    fontSize: (missingImage(item) ? Math.max(12, 14 * scale.value) : size) + 'px',
     fontWeight: item.font_weight || 600,
     fontFamily: item.font_family === 'sans' ? 'sans-serif' : 'serif',
-    textAlign: item.align || 'left',
+    textAlign: missingImage(item) ? 'center' : (item.align || 'left'),
     lineHeight: 1.25,
-    backgroundImage: item.type === 'image' && images[String(item.asset_id)] ? `url("${images[String(item.asset_id)]}")` : 'none',
+    paddingTop: missingImage(item) ? '35%' : '0',
+    backgroundImage: imageURL ? `url("${imageURL}")` : 'none',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
   }
@@ -281,7 +307,7 @@ watch(() => route.params.id, () => load())
       <button class="btn ghost" @click="undo">撤销</button>
       <button class="btn ghost" @click="analyze">分析</button>
       <button class="btn ghost" @click="download">导出 PNG</button>
-      <button class="btn primary" @click="save">保存</button>
+      <button class="btn primary" :disabled="saving" @click="save">保存</button>
     </header>
     <aside class="tools">
       <button class="tool" @click="addText">字</button>
@@ -303,7 +329,7 @@ watch(() => route.params.id, () => load())
           :style="boxStyle(item, index)"
           @pointerdown="pointerDown($event, item, 'move')"
         >
-          <div class="body" :style="paintStyle(item)">{{ item.type === 'text' ? item.text : '' }}</div>
+          <div class="body" :style="paintStyle(item)">{{ item.type === 'text' ? item.text : (missingImage(item) ? '图片已删除' : '') }}</div>
           <i v-if="selected === item.id" class="handle" data-handle @pointerdown="pointerDown($event, item, 'resize')"></i>
         </div>
       </div>

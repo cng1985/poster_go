@@ -37,6 +37,8 @@ func Evaluate(doc shared.Document) outcome {
 	}
 	largest := 0.0
 	contrastHits := 0
+	marginNoted := false
+	margin := float64(doc.Width) * 0.04
 	for _, layer := range textLayers {
 		if strings.TrimSpace(layer.Text) == "" {
 			score -= 5
@@ -52,11 +54,10 @@ func Evaluate(doc shared.Document) outcome {
 		if contrastRatio(layer.Color, doc.Background) < 3 {
 			contrastHits++
 		}
-		margin := float64(doc.Width) * 0.04
-		if layer.X < margin || layer.Y < margin {
+		if !marginNoted && (layer.X < margin || layer.Y < margin) {
+			marginNoted = true
 			score -= 3
 			suggestions = append(suggestions, Suggestion{Level: "info", Text: "文字贴边了，留出一点安全边更稳。"})
-			break
 		}
 	}
 	if contrastHits > 0 {
