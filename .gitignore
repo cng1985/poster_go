@@ -1,0 +1,6 @@
+/data/*
+!/data/.gitkeep
+/bin/
+*.exe
+coverage.out
+.DS_Store

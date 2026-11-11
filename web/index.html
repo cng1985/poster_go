@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PosterGo</title>
+  <link rel="icon" href="/favicon.svg">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="mark" aria-hidden="true"></span>
+        <span class="brand-name">PosterGo</span>
+      </div>
+      <input id="poster-name" class="poster-name" maxlength="80" aria-label="海报名称" spellcheck="false">
+      <div class="top-actions">
+        <button type="button" id="btn-posters" class="btn">我的海报</button>
+        <button type="button" id="btn-new" class="btn">新建</button>
+        <span class="sep" aria-hidden="true"></span>
+        <button type="button" id="btn-undo" class="btn" title="撤销（Ctrl Z）">撤销</button>
+        <button type="button" id="btn-redo" class="btn" title="重做（Ctrl Shift Z）">重做</button>
+        <span class="sep" aria-hidden="true"></span>
+        <button type="button" id="btn-ai" class="btn btn-accent">AI 生成</button>
+        <button type="button" id="btn-models" class="btn">模型</button>
+        <button type="button" id="btn-export" class="btn btn-primary">导出 PNG</button>
+        <button type="button" id="btn-help" class="btn btn-icon" aria-label="快捷键" title="快捷键">?</button>
+      </div>
+    </header>
+    <div class="workspace">
+      <nav class="rail" aria-label="编辑工具">
+        <button type="button" data-tab="layers" aria-pressed="true"><span class="rail-ico" data-ico="layers"></span><span>图层</span></button>
+        <button type="button" data-tab="components"><span class="rail-ico" data-ico="components"></span><span>组件</span></button>
+        <button type="button" data-tab="library"><span class="rail-ico" data-ico="library"></span><span>图片库</span></button>
+        <button type="button" data-tab="templates"><span class="rail-ico" data-ico="template"></span><span>模板</span></button>
+      </nav>
+      <aside id="left-panel" class="left-panel"></aside>
+      <main id="stage" class="stage"></main>
+      <aside id="inspector" class="inspector"></aside>
+    </div>
+    <footer class="statusbar">
+      <span id="status-size"></span>
+      <span id="status-save"></span>
+      <span class="status-spacer"></span>
+      <span id="status-zoom"></span>
+      <button type="button" id="status-model" class="status-btn">未配置模型</button>
+    </footer>
+  </div>
+  <div id="modal-root"></div>
+  <div id="toast-root"></div>
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>

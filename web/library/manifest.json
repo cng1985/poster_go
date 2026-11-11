@@ -1,0 +1,165 @@
+{
+  "items": [
+    {
+      "id": "dusk",
+      "name": "暮色",
+      "category": "background",
+      "placement": "backdrop",
+      "src": "/library/backgrounds/dusk.svg"
+    },
+    {
+      "id": "sea",
+      "name": "深海",
+      "category": "background",
+      "placement": "backdrop",
+      "src": "/library/backgrounds/sea.svg"
+    },
+    {
+      "id": "mist",
+      "name": "晨雾",
+      "category": "background",
+      "placement": "backdrop",
+      "src": "/library/backgrounds/mist.svg"
+    },
+    {
+      "id": "forest",
+      "name": "林间",
+      "category": "background",
+      "placement": "backdrop",
+      "src": "/library/backgrounds/forest.svg"
+    },
+    {
+      "id": "night",
+      "name": "夜航",
+      "category": "background",
+      "placement": "backdrop",
+      "src": "/library/backgrounds/night.svg"
+    },
+    {
+      "id": "sand",
+      "name": "暖沙",
+      "category": "background",
+      "placement": "backdrop",
+      "src": "/library/backgrounds/sand.svg"
+    },
+    {
+      "id": "neon",
+      "name": "霓虹",
+      "category": "background",
+      "placement": "backdrop",
+      "src": "/library/backgrounds/neon.svg"
+    },
+    {
+      "id": "ink",
+      "name": "水墨",
+      "category": "background",
+      "placement": "backdrop",
+      "src": "/library/backgrounds/ink.svg"
+    },
+    {
+      "id": "grid",
+      "name": "网格",
+      "category": "texture",
+      "placement": "backdrop",
+      "src": "/library/textures/grid.svg"
+    },
+    {
+      "id": "dots",
+      "name": "点阵",
+      "category": "texture",
+      "placement": "backdrop",
+      "src": "/library/textures/dots.svg"
+    },
+    {
+      "id": "diagonal",
+      "name": "斜纹",
+      "category": "texture",
+      "placement": "backdrop",
+      "src": "/library/textures/diagonal.svg"
+    },
+    {
+      "id": "grain",
+      "name": "纸纹",
+      "category": "texture",
+      "placement": "backdrop",
+      "src": "/library/textures/grain.svg"
+    },
+    {
+      "id": "waves",
+      "name": "波纹",
+      "category": "texture",
+      "placement": "backdrop",
+      "src": "/library/textures/waves.svg"
+    },
+    {
+      "id": "sunhills",
+      "name": "山与日",
+      "category": "illustration",
+      "placement": "element",
+      "src": "/library/illustrations/sunhills.svg"
+    },
+    {
+      "id": "leaf",
+      "name": "叶片",
+      "category": "illustration",
+      "placement": "element",
+      "src": "/library/illustrations/leaf.svg"
+    },
+    {
+      "id": "blocks",
+      "name": "色块",
+      "category": "illustration",
+      "placement": "element",
+      "src": "/library/illustrations/blocks.svg"
+    },
+    {
+      "id": "city",
+      "name": "城市",
+      "category": "illustration",
+      "placement": "element",
+      "src": "/library/illustrations/city.svg"
+    },
+    {
+      "id": "badgeframe",
+      "name": "徽章框",
+      "category": "illustration",
+      "placement": "element",
+      "src": "/library/illustrations/badgeframe.svg"
+    },
+    {
+      "id": "star",
+      "name": "星标",
+      "category": "icon",
+      "placement": "element",
+      "src": "/library/icons/star.svg"
+    },
+    {
+      "id": "arrow",
+      "name": "箭头",
+      "category": "icon",
+      "placement": "element",
+      "src": "/library/icons/arrow.svg"
+    },
+    {
+      "id": "check",
+      "name": "对勾",
+      "category": "icon",
+      "placement": "element",
+      "src": "/library/icons/check.svg"
+    },
+    {
+      "id": "pin",
+      "name": "定位",
+      "category": "icon",
+      "placement": "element",
+      "src": "/library/icons/pin.svg"
+    },
+    {
+      "id": "heart",
+      "name": "心形",
+      "category": "icon",
+      "placement": "element",
+      "src": "/library/icons/heart.svg"
+    }
+  ]
+}
