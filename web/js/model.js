@@ -276,14 +276,21 @@ export function applyTemplate(doc, templateDoc) {
 function scheduleSave() {
   clearTimeout(timer);
   timer = setTimeout(() => {
-    saveNow();
+    saveNow().catch(() => {});
   }, 700);
 }
 
-export async function saveNow() {
+let saveTail = Promise.resolve();
+
+export function saveNow() {
   clearTimeout(timer);
-  if (!state.doc) return;
-  if (rev === savedRev) {
+  const run = saveTail.then(persist, persist);
+  saveTail = run.then(() => {}, () => {});
+  return run;
+}
+
+async function persist() {
+  if (!state.doc || rev === savedRev) {
     state.saveState = 'saved';
     emit('chrome');
     return;
@@ -292,15 +299,9 @@ export async function saveNow() {
   const body = clone(state.doc);
   state.saveState = 'saving';
   emit('chrome');
+  let saved;
   try {
-    const saved = await savePoster(body);
-    if (my !== rev) return;
-    state.doc.updatedAt = saved.updatedAt;
-    if (saved.createdAt) state.doc.createdAt = saved.createdAt;
-    savedRev = my;
-    state.saveState = 'saved';
-    state.saveError = '';
-    lastSaveError = '';
+    saved = await savePoster(body);
   } catch (err) {
     state.saveState = 'error';
     state.saveError = err.message || '保存失败';
@@ -308,7 +309,18 @@ export async function saveNow() {
       lastSaveError = state.saveError;
       reportSaveError(state.saveError);
     }
+    emit('chrome');
+    throw err;
   }
+  if (state.doc && state.doc.id === body.id) {
+    state.doc.updatedAt = saved.updatedAt;
+    if (saved.createdAt) state.doc.createdAt = saved.createdAt;
+  }
+  if (my >= savedRev) savedRev = my;
+  if (rev !== savedRev) return persist();
+  state.saveState = 'saved';
+  state.saveError = '';
+  lastSaveError = '';
   emit('chrome');
 }
 

@@ -136,6 +136,9 @@ func (s *Store) Save(doc poster.Document) (poster.Document, error) {
 	if doc.CreatedAt.IsZero() {
 		doc.CreatedAt = old.CreatedAt
 	}
+	if !doc.UpdatedAt.IsZero() && doc.UpdatedAt.Before(old.UpdatedAt) {
+		return poster.Document{}, userErr(409, "这份海报已有更新的保存，请重新打开")
+	}
 	doc.UpdatedAt = time.Now().UTC()
 	if err := s.savePosterLocked(doc); err != nil {
 		return poster.Document{}, err

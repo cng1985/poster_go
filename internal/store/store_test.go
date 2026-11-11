@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/cng1985/poster_go/internal/llm"
 	"github.com/cng1985/poster_go/internal/poster"
@@ -54,6 +55,16 @@ func TestCRUDUploadAndSecret(t *testing.T) {
 	}
 	if err := s.Delete(copy.ID); err != nil {
 		t.Fatal(err)
+	}
+	stale := saved
+	stale.Name = "旧稿"
+	stale.UpdatedAt = saved.UpdatedAt.Add(-time.Second)
+	if _, err := s.Save(stale); err == nil || !isStatus(err, 409) {
+		t.Fatalf("stale save: %v", err)
+	}
+	current, err := s.Get(saved.ID)
+	if err != nil || current.Name != saved.Name {
+		t.Fatalf("stale write landed: %+v %v", current, err)
 	}
 
 	up, err := s.AddUpload("海报.png", []byte("\x89PNG\r\n\x1a\nrest"))

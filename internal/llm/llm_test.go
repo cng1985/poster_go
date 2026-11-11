@@ -10,6 +10,31 @@ import (
 	"testing"
 )
 
+func TestSameOrigin(t *testing.T) {
+	if !SameOrigin("https://api.example.com/v1", "https://api.example.com/v1/chat/completions") {
+		t.Fatal("same host")
+	}
+	if !SameOrigin("http://127.0.0.1/v1", "http://127.0.0.1:80/other") {
+		t.Fatal("default port")
+	}
+	if SameOrigin("https://api.example.com/v1", "https://evil.example/v1") {
+		t.Fatal("different host")
+	}
+	if SameOrigin("https://api.example.com/v1", "http://api.example.com/v1") {
+		t.Fatal("different scheme")
+	}
+}
+
+func TestDiscoveryAllowsEmptyModel(t *testing.T) {
+	p, err := NormalizeDiscovery(Profile{Name: "本地", BaseURL: "http://127.0.0.1:1234/v1"})
+	if err != nil || p.Model != "" {
+		t.Fatalf("%+v %v", p, err)
+	}
+	if _, err := Normalize(Profile{Name: "本地", BaseURL: "http://127.0.0.1:1234/v1"}); err == nil {
+		t.Fatal("chat profile without a model was accepted")
+	}
+}
+
 func TestResolve(t *testing.T) {
 	ep, err := Resolve("https://api.example.com/v1/")
 	if err != nil {

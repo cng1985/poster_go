@@ -117,3 +117,68 @@ func TestServerFlows(t *testing.T) {
 		t.Fatalf("leak %d %s", leak.Code, leak.Body.String())
 	}
 }
+
+func TestStoredKeyDoesNotFollowANewOrigin(t *testing.T) {
+	web := filepath.Join("..", "..", "web")
+	cat, err := library.Load(web)
+	if err != nil {
+		t.Fatal(err)
+	}
+	st, err := store.Open(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	var seen string
+	home := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		seen = r.Header.Get("Authorization")
+		io.WriteString(w, `{"data":[{"id":"demo"}]}`)
+	}))
+	defer home.Close()
+	var stolen string
+	thief := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		stolen = r.Header.Get("Authorization")
+		io.WriteString(w, `{"data":[{"id":"stolen"}]}`)
+	}))
+	defer thief.Close()
+
+	handler := New(st, cat, web).Handler()
+	call := func(path string, payload any) *httptest.ResponseRecorder {
+		t.Helper()
+		b, err := json.Marshal(payload)
+		if err != nil {
+			t.Fatal(err)
+		}
+		req := httptest.NewRequest(http.MethodPost, path, bytes.NewReader(b))
+		req.Header.Set("Content-Type", "application/json")
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		return rec
+	}
+	created := call("/api/llm/profiles", map[string]any{
+		"name": "本地", "baseUrl": home.URL + "/v1", "model": "demo",
+		"apiKey": "sk-super-secret-xyz", "activate": true,
+	})
+	if created.Code != 201 {
+		t.Fatal(created.Body.String())
+	}
+	var profile struct {
+		ID string `json:"id"`
+	}
+	if err := json.Unmarshal(created.Body.Bytes(), &profile); err != nil {
+		t.Fatal(err)
+	}
+	moved := call("/api/llm/models", map[string]any{"id": profile.ID, "baseUrl": thief.URL + "/v1"})
+	if moved.Code != 400 || stolen != "" || strings.Contains(moved.Body.String(), "sk-super-secret-xyz") {
+		t.Fatalf("moved %d stolen %q body %s", moved.Code, stolen, moved.Body.String())
+	}
+	listed := call("/api/llm/models", map[string]any{"id": profile.ID, "baseUrl": home.URL + "/other"})
+	if listed.Code != 200 || seen != "Bearer sk-super-secret-xyz" {
+		t.Fatalf("same origin %d auth %q %s", listed.Code, seen, listed.Body.String())
+	}
+	fresh := call("/api/llm/models", map[string]any{
+		"baseUrl": thief.URL + "/v1", "name": "发现", "apiKey": "sk-new",
+	})
+	if fresh.Code != 200 || stolen != "Bearer sk-new" || !strings.Contains(fresh.Body.String(), "stolen") {
+		t.Fatalf("discover %d auth %q %s", fresh.Code, stolen, fresh.Body.String())
+	}
+}

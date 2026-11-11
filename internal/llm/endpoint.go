@@ -44,6 +44,29 @@ func Resolve(base string) (Endpoint, error) {
 	return Endpoint{Chat: chat.String(), Models: models.String()}, nil
 }
 
+// SameOrigin reports whether two API roots use the same scheme, host, and port.
+func SameOrigin(a, b string) bool {
+	ao, aok := originOf(a)
+	bo, bok := originOf(b)
+	return aok && bok && ao == bo
+}
+
+func originOf(raw string) (string, bool) {
+	u, err := url.Parse(strings.TrimSpace(raw))
+	if err != nil || u.Host == "" || (u.Scheme != "http" && u.Scheme != "https") {
+		return "", false
+	}
+	port := u.Port()
+	if port == "" {
+		if u.Scheme == "https" {
+			port = "443"
+		} else {
+			port = "80"
+		}
+	}
+	return strings.ToLower(u.Scheme) + "://" + strings.ToLower(u.Hostname()) + ":" + port, true
+}
+
 func blockedHost(host string) bool {
 	h := strings.ToLower(strings.TrimSuffix(host, "."))
 	switch h {

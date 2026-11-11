@@ -73,7 +73,7 @@ func (s *Server) createProfile(w http.ResponseWriter, r *http.Request) {
 		if len(file.Profiles) >= 20 {
 			return &store.Error{Status: 400, Msg: "最多保存 20 个模型配置"}
 		}
-		profile, err := s.mergeProfile(*file, in, true)
+		profile, err := s.mergeProfile(*file, in, true, true)
 		if err != nil {
 			return err
 		}
@@ -102,7 +102,7 @@ func (s *Server) updateProfile(w http.ResponseWriter, r *http.Request) {
 	var updated publicProfile
 	active := ""
 	err = s.Store.UpdateLLM(func(file *store.LLMFile) error {
-		profile, err := s.mergeProfile(*file, in, true)
+		profile, err := s.mergeProfile(*file, in, true, true)
 		if err != nil {
 			return err
 		}
@@ -195,7 +195,7 @@ func (s *Server) testProfile(w http.ResponseWriter, r *http.Request) {
 		mapErr(w, err, "配置不存在")
 		return
 	}
-	profile, err := s.mergeProfile(file, in, false)
+	profile, err := s.mergeProfile(file, in, false, true)
 	if err != nil {
 		writeProfileErr(w, err)
 		return
@@ -224,7 +224,7 @@ func (s *Server) listModels(w http.ResponseWriter, r *http.Request) {
 		mapErr(w, err, "配置不存在")
 		return
 	}
-	profile, err := s.mergeProfile(file, in, false)
+	profile, err := s.mergeProfile(file, in, false, false)
 	if err != nil {
 		writeProfileErr(w, err)
 		return
@@ -323,13 +323,15 @@ func (s *Server) assets() []llm.Asset {
 	return out
 }
 
-func (s *Server) mergeProfile(file store.LLMFile, in profileInput, overwrite bool) (llm.Profile, error) {
+func (s *Server) mergeProfile(file store.LLMFile, in profileInput, overwrite, requireModel bool) (llm.Profile, error) {
 	base := llm.Profile{Temperature: 0.7, MaxTokens: 2048, AuthType: "bearer", TokenParam: "max_tokens"}
+	storedURL := ""
 	if in.ID != "" {
 		found := false
 		for _, p := range file.Profiles {
 			if p.ID == in.ID {
 				base = p
+				storedURL = p.BaseURL
 				found = true
 				break
 			}
@@ -371,7 +373,13 @@ func (s *Server) mergeProfile(file store.LLMFile, in profileInput, overwrite boo
 	if key != "" && !strings.Contains(key, "•") {
 		base.APIKey = key
 	}
-	return llm.Normalize(base)
+	if storedURL != "" && base.APIKey != "" && key == "" && !in.ClearAPIKey && !llm.SameOrigin(storedURL, base.BaseURL) {
+		return llm.Profile{}, errString("更换接口地址后需要重新填写密钥")
+	}
+	if requireModel {
+		return llm.Normalize(base)
+	}
+	return llm.NormalizeDiscovery(base)
 }
 
 func readProfileInput(r *http.Request) (profileInput, error) {

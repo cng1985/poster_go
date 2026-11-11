@@ -21,6 +21,15 @@ type Profile struct {
 
 // Normalize checks a profile and fills defaults. The API key may be empty for local servers.
 func Normalize(p Profile) (Profile, error) {
+	return normalize(p, true)
+}
+
+// NormalizeDiscovery checks a profile used only to list models. The model name may be empty.
+func NormalizeDiscovery(p Profile) (Profile, error) {
+	return normalize(p, false)
+}
+
+func normalize(p Profile, requireModel bool) (Profile, error) {
 	p.Name = strings.TrimSpace(p.Name)
 	if p.Name == "" {
 		return p, fmt.Errorf("请填写配置名称")
@@ -33,7 +42,7 @@ func Normalize(p Profile) (Profile, error) {
 		return p, err
 	}
 	p.Model = strings.TrimSpace(p.Model)
-	if p.Model == "" || len(p.Model) > 128 {
+	if (requireModel && p.Model == "") || len(p.Model) > 128 {
 		return p, fmt.Errorf("请填写模型名称")
 	}
 	if p.Temperature < 0 || p.Temperature > 2 {

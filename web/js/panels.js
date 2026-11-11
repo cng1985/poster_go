@@ -686,16 +686,26 @@ async function openOne(id, close) {
     close();
     return;
   }
-  await saveNow();
-  loadDoc(await api.getPoster(id));
+  try {
+    await saveNow();
+    loadDoc(await api.getPoster(id));
+  } catch (err) {
+    toast(err.message || '保存失败', 'error');
+    return;
+  }
   close();
 }
 
 async function copyOne(id, close) {
-  await saveNow();
-  const doc = await api.duplicatePoster(id);
-  state.posters = await api.listPosters();
-  loadDoc(doc);
+  try {
+    await saveNow();
+    const doc = await api.duplicatePoster(id);
+    state.posters = await api.listPosters();
+    loadDoc(doc);
+  } catch (err) {
+    toast(err.message || '保存失败', 'error');
+    return;
+  }
   close();
   toast('已复制海报');
 }
