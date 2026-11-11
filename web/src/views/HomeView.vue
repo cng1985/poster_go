@@ -39,8 +39,9 @@ async function generate() {
 </script>
 
 <template>
-  <section class="hero">
+  <section class="hero" :class="{ solo: !recent[0] }">
     <div>
+      <p class="kicker">工作台</p>
       <h1>今天做哪一张？</h1>
       <p class="lede">选一个模块，上传图片，或让模型先排一版。没有配置模型密钥时，工坊会用本地排版接上，不会空着手。</p>
       <div class="actions">
@@ -50,7 +51,9 @@ async function generate() {
       </div>
     </div>
     <div class="hero-card" v-if="recent[0]">
+      <p class="kicker">最近一张</p>
       <PosterPreview :document="recent[0].document" :max-width="320" />
+      <p class="hero-caption">{{ recent[0].title }}</p>
     </div>
   </section>
   <h2>最近的海报</h2>

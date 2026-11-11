@@ -51,7 +51,7 @@ function styleOf(layer) {
 </template>
 
 <style scoped>
-.preview { position: relative; overflow: hidden; border-radius: 12px; }
+.preview { position: relative; overflow: hidden; border-radius: 14px; }
 .sheet { position: absolute; left: 0; top: 0; }
 .layer { position: absolute; overflow: hidden; }
 .body { width: 100%; height: 100%; }
